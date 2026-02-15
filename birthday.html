@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>С днём рождения 💜</title>
+  <style>
+    :root{
+      --lavender:#e9dcff;
+      --violet:#6b4bbd;
+      --violet-soft:#8b6fe0;
+      --card:#ffffffee;
+      --shadow:0 10px 30px rgba(107,75,189,.25);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(139,111,224,.25), transparent 35%),
+        radial-gradient(circle at 80% 30%, rgba(107,75,189,.25), transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(139,111,224,.2), transparent 45%),
+        var(--lavender);
+      color:#3a2a66;
+      overflow:hidden;
+    }
+
+    .app{
+      position:relative;
+      width:100%;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+
+    .card{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px 16px 16px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    h1,h2{
+      margin:.3rem 0 .4rem;
+      color:var(--violet);
+    }
+    p{opacity:.9}
+
+    .screen{display:none}
+    .screen.active{display:block; animation:fade .35s ease}
+    @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+    button{
+      appearance:none_toggle;
+      border:none;
+      border-radius:999px;
+      padding:.7rem 1.1rem;
+      background:linear-gradient(135deg, var(--violet), var(--violet-soft));
+      color:white;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(107,75,189,.35);
+      transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    button.secondary{
+      background:#efe9ff;
+      color:var(--violet);
+      box-shadow:0 6px 14px rgba(107,75,189,.2);
+    }
+    button:hover{transform:translateY(-1px); filter:brightness(1.05)}
+    button:active{transform:translateY(0)}
+
+    .nav{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-top:12px;
+    }
+
+    /* Hearts background */
+    .heart{
+      position:absolute;
+      font-size:18px;
+      color:rgba(107,75,189,.35);
+      animation:float 8s linear infinite;
+      user-select:none;
+      pointer-events:none;
+    }
+    @keyframes float{
+      from{transform:translateY(110vh) scale(.9); opacity:.0}
+      10%{opacity:.8}
+      to{transform:translateY(-10vh) scale(1.2); opacity:0}
+    }
+
+    /* Song */
+    .video{
+      position:relative;
+      padding-top:56.25%;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 10px 24px rgba(107,75,189,.25);
+      margin:10px 0 6px;
+    }
+    .video iframe{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      border:0;
+    }
+
+    /* Reasons */
+    .reasons{
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .reason-btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius:18px;
+      border:none;
+      background:#fff;
+      color:var(--violet);
+      font-weight:700;
+      text-align:left;
+      box-shadow:0 8px 18px rgba(107,75,189,.18);
+      cursor:pointer;
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .reason-btn:hover{transform:translateY(-1px); box-shadow:0 12px 24px rgba(107,75,189,.25)}
+
+    /* Modal */
+    .modal{
+      position:fixed; inset:0;
+      background:rgba(107,75,189,.35);
+      display:none;
+      align-items:center; justify-content:center;
+      z-index:999;
+      padding:16px;
+    }
+    .modal.active{display:flex}
+    .modal-content{
+      width:100%; max-width:360px;
+      background:white;
+      border-radius:22px;
+      padding:16px 14px 14px;
+      text-align:center;
+      box-shadow:0 18px 40px rgba(107,75,189,.35);
+      animation:pop .25s ease;
+    }
+    @keyframes pop{from{transform:scale(.9); opacity:0} to{transform:scale(1); opacity:1}}
+    .modal h3{color:var(--violet); margin:.2rem 0 .3rem}
+
+    /* Letter */
+    .letter{
+      text-align:left;
+      background:#faf7ff;
+      border-radius:16px;
+      padding:12px 12px 10px;
+      box-shadow: inset 0 0 0 1px rgba(107,75,189,.08);
+      line-height:1.55;
+      font-size:.95rem;
+    }
+
+    /* Memory game */
+.memory-wrap{
+  margin-top:10px;
+}
+
+.memory-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+  margin-top:8px;
+}
+
+.memory-card{
+  height:70px;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 8px 18px rgba(107,75,189,.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  cursor:pointer;
+  user-select:none;
+  transition:.2s ease;
+}
+
+.memory-card.open{
+  background:linear-gradient(135deg, #efe9ff, #e9dcff);
+  box-shadow:inset 0 0 0 2px rgba(107,75,189,.25);
+}
+
+.memory-card.done{
+  opacity:.4;
+  pointer-events:none;
+  background:#efe9ff;
+}
+
+    /* Confetti */
+.confetti{
+  position:fixed;
+  top:-10px;
+  width:8px;
+  height:12px;
+  border-radius:2px;
+  pointer-events:none;
+  animation:confettiFall 2.2s linear forwards;
+  z-index:1000;
+}
+
+@keyframes confettiFall{
+  to{
+    transform: translateY(110vh) rotate(720deg);
+    opacity:0;
+  }
+}
+
+    /* Photo grid */
+.photo-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+  margin:10px 0 6px;
+}
+
+.profile-img{
+  width:100%;
+  aspect-ratio:1 / 1;         /* делает квадрат */
+  object-fit:cover;           /* чтобы фото не растягивались */
+  border-radius:50%;          /* круг */
+  box-shadow:0 8px 18px rgba(107,75,189,.25);
+  border:3px solid #efe9ff;   /* в цветах сайта */
+  background:#efe9ff;
+}
+
+    /* Envelopes */
+.envelope-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio: 4 / 3;
+  max-width:120px;
+  margin:0 auto 6px;
+}
+
+.envelope-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  transition:.45s ease;
+}
+
+.envelope-img.open{
+  opacity:0;
+  transform:translateY(-10px) scale(.95);
+}
+
+.letter-card.opened .envelope-img.closed{
+  opacity:0;
+  transform:scale(.9);
+}
+
+.letter-card.opened .envelope-img.open{
+  opacity:1;
+  transform:translateY(-14px) scale(1);
+}
+
+.photo-stack{
+  position: relative;
+  width: 320px;        /* увеличили ширину */
+  height: 220px;       /* увеличили высоту */
+  margin: 16px auto;   /* отступ сверху и снизу */
+  cursor: pointer;
+  perspective: 800px;  /* чуть глубже для эффекта 3D */
+}
+
+.stack-img{
+  position: absolute;
+  width: 100px;        /* чуть больше картинок */
+  height: 100px;
+  border-radius: 12px;
+  object-fit: cover;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  box-shadow: 0 8px 20px rgba(107,75,189,.25);
+  transition: transform 0.5s ease, z-index 0.3s ease;
+}
+
+/* Раздвинутый вариант */
+.photo-stack.spread .stack-img:nth-child(1){
+  transform: translate(-140%, -60%) rotate(-10deg);
+  z-index:1;
+}
+.photo-stack.spread .stack-img:nth-child(2){
+  transform: translate(-50%, -160%) rotate(5deg);
+  z-index:2;
+}
+.photo-stack.spread .stack-img:nth-child(3){
+  transform: translate(60%, -50%) rotate(12deg);
+  z-index:3;
+}
+
+/* Чтобы текст не перекрывался, добавляем отступ снизу */
+.photo-stack + p{
+  margin-top: 12px;
+}
+
+    .timeline-container{
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin: 16px auto;
+  padding: 20px 0;
+}
+
+.timeline-line{
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 4px;
+  background: #e9dcff;
+  border-radius: 2px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.timeline-items{
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: default;
+}
+
+.timeline-photo{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #efe9ff;
+  box-shadow: 0 6px 18px rgba(107,75,189,.25);
+  margin-bottom: 6px;
+  transition: transform 0.3s ease;
+}
+
+.timeline-year{
+  font-weight: 700;
+  color: var(--violet);
+  font-size: 0.9rem;
+}
+
+    .animated-bouquet{
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.flower{
+  font-size: 48px;
+  transform: translateY(-50px) scale(0);
+  animation: flowerAppear 0.6s forwards;
+}
+
+.flower:nth-child(2){ animation-delay: 0.2s; }
+.flower:nth-child(3){ animation-delay: 0.4s; }
+.flower:nth-child(4){ animation-delay: 0.6s; }
+
+/* Появление + лёгкое покачивание */
+@keyframes flowerAppear{
+  0% { transform: translateY(-50px) scale(0); opacity:0; }
+  60% { transform: translateY(0px) scale(1.2); opacity:1; }
+  80% { transform: translateY(-4px) scale(0.95); }
+  100% { transform: translateY(0px) scale(1); }
+}
+
+/* Можно добавить лёгкое бесконечное покачивание после появления */
+.animated-bouquet.flower-sway .flower{
+  animation: sway 2s ease-in-out infinite alternate;
+}
+
+@keyframes sway{
+  0% { transform: translateY(0px) rotate(-5deg); }
+  50% { transform: translateY(0px) rotate(5deg); }
+  100% { transform: translateY(0px) rotate(-5deg); }
+}
+
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="card">
+
+<!-- Screen 1 -->
+<div class="screen active" id="screen1">
+  <h1>С днём рождения 💜</h1>
+  <p>Я сделал(а) для тебя маленький сюрприз.</p>
+
+  <div class="memory-wrap">
+    <p style="opacity:.7">Найди все три пары фигур 💜</p>
+    <div class="memory-grid" id="memoryGrid"></div>
+    <button id="continueBtn" onclick="nextScreen()" style="display:none; margin-top:10px;">
+      Продолжить ✨
+    </button>
+  </div>
+</div>
+
+      <div class="screen" id="screen2">
+  <h2>Наши воспоминания 📸</h2>
+  <div class="photo-grid">
+    <img src="photo_1.jpg" class="profile-img" alt="">
+    <img src="photo_2.jpg" class="profile-img" alt="">
+    <img src="photo_3.jpg" class="profile-img" alt="">
+    <img src="photo_4.jpg" class="profile-img" alt="">
+    <img src="photo_5.jpg" class="profile-img" alt="">
+    <img src="photo_6.jpg" class="profile-img" alt="">
+  </div>
+  <div class="nav">
+    <button onclick="nextScreen()">Дальше 💜</button>
+  </div>
+</div>
+
+      <!-- Screen 2: Song -->
+      <div class="screen" id="screen3">
+        <h2>Песня, которая ассоциируется с тобой 🎵</h2>
+        <p>Нажми play</p>
+        <div class="video">
+          <!-- Встроенная ссылка (embed) -->
+          <iframe
+            src="https://www.youtube.com/embed/XSzMpmmmf9o"
+            title="YouTube video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+        </div>
+        <div class="nav">
+          <button class="secondary" onclick="prevScreen()">Назад</button>
+          <button onclick="nextScreen()">Дальше 💜</button>
+        </div>
+      </div>
+
+      <!-- Screen 3: Reasons -->
+      <div class="screen" id="screen4">
+        <h2>Почему я тебя люблю 💜</h2>
+        <p style="opacity:.7">Нажми на каждый чтобы открыть.</p>
+
+        <div class="reasons">
+          <button class="reason-btn" onclick="openReason('Твоя настойчивость', 'Я обожаю, как ты не сдаёшься и доводишь дела до конца. Твоя целеустремлённость меня вдохновляет 💜')">💜 Твоя настойчивость</button>
+          <button class="reason-btn" onclick="openReason('Твоя нежность', 'Твоя нежность и забота делают мир вокруг теплее. Рядом с тобой спокойно ✨')">💜 Твоя нежность </button>
+          <button class="reason-btn" onclick="openReason('Твой юмор', 'Ты умеешь рассмешить меня даже в самый сложный день 😌')">💜 Твой юмор</button>
+          <button class="reason-btn" onclick="openReason('Твоя красота', 'Ты красива(ый) не только внешне — твой внутренний свет делает тебя особенной(ым) ✨')">💜 Твоя красота</button>
+          <button class="reason-btn" onclick="openReason('Твоё сердце', 'Твоё большое и доброе сердце — это то, за что я люблю тебя ещё сильнее 💜')">💜 Твоё сердце</button>
+          <button class="reason-btn" onclick="openReason('Наше будущее', 'Мне нравится мечтать о нашем будущем и обо всём, что мы ещё проживём вместе 💫')">💜 Наше будущее</button>
+        </div>
+
+        <div class="nav">
+          <button class="secondary" onclick="prevScreen()">Назад</button>
+          <button onclick="nextScreen()">Дальше ✉️</button>
+        </div>
+      </div>
+
+      <!-- Screen X: Letters -->
+
+     <!-- Screen 5: Выбор письма -->
+      <div class="screen" id="screen5">
+        <h2>Выбери письмо 💌</h2>
+
+        <div class="letters">
+          <div class="letter-card" data-id="1" onclick="openLetter(1, this)">
+            <div class="envelope-wrap">
+              <img src="envelope_closed.jpg" class="envelope-img closed">
+              <img src="envelope_open.jpg" class="envelope-img open">
+            </div>
+            <p>Письмо 1</p>
+          </div>
+
+          <div class="letter-card" data-id="2" onclick="openLetter(2, this)">
+            <div class="envelope-wrap">
+              <img src="envelope_closed.jpg" class="envelope-img closed">
+              <img src="envelope_open.jpg" class="envelope-img open">
+            </div>
+            <p>Письмо 2</p>
+          </div>
+
+          <div class="letter-card" data-id="3" onclick="openLetter(3, this)">
+            <div class="envelope-wrap">
+              <img src="envelope_closed.jpg" class="envelope-img closed">
+              <img src="envelope_open.jpg" class="envelope-img open">
+            </div>
+            <p>Письмо 3</p>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button class="secondary" onclick="prevScreen()">Назад</button>
+          <button onclick="nextScreen()">Дальше ✉️</button>
+        </div>
+
+        <!-- Звук открытия -->
+        <audio id="openSound" src="open.mp3" preload="auto"></audio>
+      </div>
+
+      <!-- Screen 6: Содержание письма -->
+      <div class="screen" id="screen6">
+        <h2>Небольшое письмо 💌</h2>
+        <div class="letter">
+          <p>Ты — очень важный человек в моей жизни.</p>
+          <p>Я благодарен(на) за каждый момент рядом с тобой, за смех, за поддержку и за тепло, которое ты даришь.</p>
+          <p>Пусть этот день будет началом ещё одного классного года для тебя ✨</p>
+        </div>
+        <div class="nav">
+          <button class="secondary" onclick="prevScreen()">Назад</button>
+          <button onclick="nextScreen()">Финал 💫</button>
+        </div>
+      </div>
+
+      <!-- Screen 5: Final -->
+  <div class="screen" id="screen7">
+        <h2>Ты — особенный(ая) 💜</h2>
+        <p>Спасибо, что ты есть. Пусть всё, что ты любишь, возвращается к тебе вдвойне ✨</p>
+        <div class="nav">
+          <button onclick="goTo(1)">Сначала</button>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="reasonModal">
+    <div class="modal-content">
+      <h3 id="reasonTitle"></h3>
+      <p id="reasonText"></p>
+      <button onclick="closeReason()">Close 💜</button>
+    </div>
+  </div>
+
+<script>
+  let current = 1;
+  const total = 7;
+
+  function showScreen(n){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById('screen'+n);
+    if(el) el.classList.add('active');
+    current = n;
+  }
+  function nextScreen(){
+    if(current < total) showScreen(current+1);
+  }
+  function prevScreen(){
+    if(current > 1) showScreen(current-1);
+  }
+  function goTo(n){ showScreen(n); }
+
+  // Modal
+  function openReason(title, text){
+    document.getElementById('reasonTitle').innerText = title;
+    document.getElementById('reasonText').innerText = text;
+    document.getElementById('reasonModal').classList.add('active');
+  }
+  function closeReason(){
+    document.getElementById('reasonModal').classList.remove('active');
+  }
+
+  // Floating hearts
+  const app = document.getElementById('app');
+  setInterval(()=>{
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = '💜';
+    h.style.left = Math.random()*100 + 'vw';
+    h.style.animationDuration = (6 + Math.random()*6) + 's';
+    app.appendChild(h);
+    setTimeout(()=>h.remove(), 12000);
+  }, 700);
+
+  // === Memory game ===
+  const symbols = ['💜','⭐','⚪'];
+  let deck = [];
+  let opened = [];
+  let found = new Set();
+
+  const grid = document.getElementById('memoryGrid');
+  const continueBtn = document.getElementById('continueBtn');
+
+  function shuffle(arr){
+    return arr.sort(()=>Math.random()-0.5);
+  }
+
+function initMemory(){
+  grid.innerHTML = '';
+  opened = [];
+  found.clear();
+  continueBtn.style.display = 'none';
+
+  deck = shuffle([...symbols, ...symbols, ...symbols]);
+
+  deck.forEach(sym=>{
+    const card = document.createElement('div');
+    card.className = 'memory-card open'; // сразу подсветим
+    card.dataset.symbol = sym;
+    card.textContent = sym; // показать символ
+    grid.appendChild(card);
+  });
+
+  // дать браузеру отрисовать карточки
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll('.memory-card').forEach(card => {
+        card.textContent = '';
+        card.classList.remove('open');
+        card.onclick = () => handleFlip(card);
+      });
+    }, 2500);
+  });
+}
+
+
+function handleFlip(card){
+  if(card.classList.contains('open') || card.classList.contains('done')) return;
+
+  card.textContent = card.dataset.symbol;
+  card.classList.add('open');
+  opened.push(card);
+
+  const unique = [...new Set(opened.map(c=>c.dataset.symbol))];
+
+  // 2 разные фигуры → перемешать
+  if(opened.length === 2 && unique.length > 1){
+    setTimeout(resetRound, 700);
+  }
+
+  // 3 клика, но не все одинаковые → просто закрыть и пробовать снова
+  if(opened.length === 3 && unique.length !== 1){
+    setTimeout(() => {
+      opened.forEach(c=>{
+        c.textContent = '';
+        c.classList.remove('open');
+      });
+      opened = [];
+    }, 700);
+  }
+
+  // Успешная тройка
+  if(opened.length === 3 && unique.length === 1){
+    opened.forEach(c=>{
+      c.classList.add('done');
+      c.classList.remove('open');
+    });
+    found.add(unique[0]);
+    opened = [];
+
+    if(found.size === 3){
+      continueBtn.style.display = 'inline-block';
+    launchConfetti();
+    }
+
+  }
+}
+
+  function resetRound(){
+    opened.forEach(c=>{
+      c.textContent = '';
+      c.classList.remove('open');
+    });
+    opened = [];
+    shuffleGrid();
+  }
+
+  function resetAll(){
+    document.querySelectorAll('.memory-card').forEach(c=>{
+      c.textContent = '';
+      c.classList.remove('open');
+    });
+    opened = [];
+    shuffleGrid();
+  }
+
+  function shuffleGrid(){
+    const cards = [...document.querySelectorAll('.memory-card')];
+    shuffle(cards).forEach(c=>grid.appendChild(c));
+  }
+
+  initMemory();
+
+  function launchConfetti(){
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = Math.random() > 0.5 ? '#6b4bbd' : '#e9dcff';
+    c.style.animationDuration = (1.6 + Math.random()*1.2) + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 2500);
+  }
+}
+
+  const openedLetters = new Set();
+
+function openLetter(n, el){
+  if(openedLetters.has(n)) return; // уже открыто
+
+  openedLetters.add(n);
+  el.classList.add('opened');
+
+  // звук
+  const snd = document.getElementById('openSound');
+  if(snd){
+    snd.currentTime = 0;
+    snd.play().catch(()=>{});
+  }
+
+  // показать контент письма (как было раньше)
+  const modal = document.getElementById('reasonModal');
+  const title = document.getElementById('reasonTitle');
+  const text = document.getElementById('reasonText');
+
+if(n === 1){
+  title.innerText = 'Без чего ты не выйдешь из дома';
+  text.innerHTML = `
+    <div class="photo-stack">
+      <img src="item1.jpg" class="stack-img">
+      <img src="item2.jpg" class="stack-img">
+      <img src="item3.jpg" class="stack-img">
+    </div>
+    <p style="margin-top:8px; opacity:.7">Нажми на окно 💜</p>
+  `;
+
+  // добавить обработчик, чтобы картинки разъехались при клике
+  const stack = text.querySelector('.photo-stack');
+  stack.onclick = () => {
+    stack.classList.toggle('spread');
+  };
+}
+
+if(n === 2){
+  title.innerText = 'Наша история';
+  text.innerHTML = `
+    <div class="timeline-container">
+      <div class="timeline-line"></div>
+      <div class="timeline-items">
+        <div class="timeline-item">
+          <img src="year1.jpg" class="timeline-photo">
+          <span class="timeline-year">2022</span>
+        </div>
+        <div class="timeline-item">
+          <img src="year2.jpg" class="timeline-photo">
+          <span class="timeline-year">2023</span>
+        </div>
+        <div class="timeline-item">
+          <img src="year3.jpg" class="timeline-photo">
+          <span class="timeline-year">2024</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+if(n === 3){
+  title.innerText = 'Специально для тебя';
+  text.innerHTML = `
+    <div class="animated-bouquet">
+      <div class="flower">🌸</div>
+      <div class="flower">💐</div>
+      <div class="flower">🌷</div>
+      <div class="flower">🌹</div>
+    </div>
+    <p style="opacity:.8; margin-top:8px;">Пусть у тебя всегда будут поводы улыбаться 💜</p>
+  `;
+}
+
+
+  modal.classList.add('active');
+
+  // если открыты все 3 — показать кнопку Дальше
+  if(openedLetters.size === 3){
+    document.getElementById('lettersNextBtn').style.display = 'inline-block';
+  }
+}
+</script>
+    </body>
